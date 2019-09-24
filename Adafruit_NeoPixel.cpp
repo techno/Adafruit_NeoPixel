@@ -108,7 +108,7 @@ Adafruit_NeoPixel::~Adafruit_NeoPixel() {
 void Adafruit_NeoPixel::begin(void) {
   if(pin >= 0) {
     pinMode(pin, OUTPUT);
-    digitalWrite(pin, LOW);
+    digitalWrite(pin, HIGH);
   }
   begun = true;
 }
@@ -1361,12 +1361,12 @@ void Adafruit_NeoPixel::show(void) {
 //#define MAGIC_T1H              12UL | (0x8000) // 0.75us
 
 // WS2812B (rev B) timing is 0.4 and 0.8 us
-#define MAGIC_T0H               6UL | (0x8000) // 0.375us
-#define MAGIC_T1H              13UL | (0x8000) // 0.8125us
+#define MAGIC_T0H               6UL | (0x0000) // 0.375us
+#define MAGIC_T1H              13UL | (0x0000) // 0.8125us
 
 // WS2811 (400 khz) timing is 0.5 and 1.2
-#define MAGIC_T0H_400KHz        8UL  | (0x8000) // 0.5us
-#define MAGIC_T1H_400KHz        19UL | (0x8000) // 1.1875us
+#define MAGIC_T0H_400KHz        8UL  | (0x0000) // 0.5us
+#define MAGIC_T1H_400KHz        19UL | (0x0000) // 1.1875us
 
 // For 400Khz, we double value of CTOPVAL
 #define CTOPVAL                20UL            // 1.25us
@@ -1459,8 +1459,8 @@ void Adafruit_NeoPixel::show(void) {
     }
 
     // Zero padding to indicate the end of que sequence
-    pixels_pattern[pos++] = 0 | (0x8000); // Seq end
-    pixels_pattern[pos++] = 0 | (0x8000); // Seq end
+    pixels_pattern[pos++] = 0 | (0x0000); // Seq end
+    pixels_pattern[pos++] = 0 | (0x0000); // Seq end
 
     // Set the wave mode to count UP
     pwm->MODE = (PWM_MODE_UPDOWN_Up << PWM_MODE_UPDOWN_Pos);
@@ -1592,7 +1592,7 @@ void Adafruit_NeoPixel::show(void) {
           while(DWT->CYCCNT - cyc < CYCLES_X00);
           cyc  = DWT->CYCCNT;
 
-          nrf_port->OUTSET |= pinMask;
+          nrf_port->OUTCLR |= pinMask;
 
           if(pix & mask) {
             while(DWT->CYCCNT - cyc < CYCLES_X00_T1H);
@@ -1600,7 +1600,7 @@ void Adafruit_NeoPixel::show(void) {
             while(DWT->CYCCNT - cyc < CYCLES_X00_T0H);
           }
 
-          nrf_port->OUTCLR |= pinMask;
+          nrf_port->OUTSET |= pinMask;
         }
       }
       while(DWT->CYCCNT - cyc < CYCLES_X00);
@@ -2214,7 +2214,7 @@ void Adafruit_NeoPixel::setPin(uint16_t p) {
   pin = p;
   if(begun) {
     pinMode(p, OUTPUT);
-    digitalWrite(p, LOW);
+    digitalWrite(p, HIGH);
   }
 #ifdef __AVR__
   port    = portOutputRegister(digitalPinToPort(p));
