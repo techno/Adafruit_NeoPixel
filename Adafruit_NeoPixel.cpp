@@ -134,6 +134,13 @@ void Adafruit_NeoPixel::updateLength(uint16_t n) {
   } else {
     numLEDs = numBytes = 0;
   }
+
+  if (pixels_pattern != NULL) {
+    rtos_free(pixels_pattern);
+  }
+  
+  uint32_t  pattern_size   = numBytes*8*sizeof(uint16_t)+2*sizeof(uint16_t);
+  pixels_pattern = (uint16_t *) rtos_malloc(pattern_size);
 }
 
 /*!
@@ -1402,7 +1409,6 @@ void Adafruit_NeoPixel::show(void) {
   // If there is not enough memory, we will fall back to cycle counter
   // using DWT
   uint32_t  pattern_size   = numBytes*8*sizeof(uint16_t)+2*sizeof(uint16_t);
-  uint16_t* pixels_pattern = NULL;
 
   NRF_PWM_Type* pwm = NULL;
 
@@ -1428,6 +1434,7 @@ void Adafruit_NeoPixel::show(void) {
   }
 
   // only malloc if there is PWM device available
+  /*
   if ( pwm != NULL ) {
     #ifdef ARDUINO_NRF52_ADAFRUIT // use thread-safe malloc
       pixels_pattern = (uint16_t *) rtos_malloc(pattern_size);
@@ -1435,11 +1442,12 @@ void Adafruit_NeoPixel::show(void) {
       pixels_pattern = (uint16_t *) malloc(pattern_size);
     #endif
   }
+  */
 
   // Use the identified device to choose the implementation
   // If a PWM device is available use DMA
   if( (pixels_pattern != NULL) && (pwm != NULL) ) {
-    uint16_t pos = 0; // bit position
+    uint16_t pos = 0; // bit position    
 
     for(uint16_t n=0; n<numBytes; n++) {
       uint8_t pix = pixels[n];
@@ -1536,11 +1544,13 @@ void Adafruit_NeoPixel::show(void) {
 
     pwm->PSEL.OUT[0] = 0xFFFFFFFFUL;
 
+    /*
     #ifdef ARDUINO_NRF52_ADAFRUIT  // use thread-safe free
       rtos_free(pixels_pattern);
     #else
       free(pixels_pattern);
     #endif
+    */
   }// End of DMA implementation
   // ---------------------------------------------------------------------
   else{
